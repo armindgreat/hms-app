@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Management System</title>
+    <script>
+        // Register a patient
+        async function registerPatient() {
+            const patientData = {
+                name: document.getElementById('patientName').value,
+                age: document.getElementById('patientAge').value,
+                gender: document.getElementById('patientGender').value,
+                address: document.getElementById('patientAddress').value,
+                contact_number: document.getElementById('patientContact').value
+            };
+
+            const response = await fetch('/register_patient', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(patientData)
+            });
+
+            const result = await response.json();
+            alert(result.message);
+            fetchPatients();  // Refresh the patient list after registering
+        }
+
+        // Admit a patient
+        async function admitPatient() {
+            const patientId = document.getElementById('admitPatientId').value;
+
+            const response = await fetch(`/admit_patient/${patientId}`, {
+                method: 'PUT'
+            });
+
+            const result = await response.json();
+            alert(result.message);
+        }
+
+        // Discharge a patient
+        async function dischargePatient() {
+            const patientId = document.getElementById('dischargePatientId').value;
+
+            const response = await fetch(`/discharge_patient/${patientId}`, {
+                method: 'PUT'
+            });
+
+            const result = await response.json();
+            alert(result.message);
+        }
+
+        // Fetch and display the list of patients
+        async function fetchPatients() {
+            const response = await fetch('/get_patients');
+            const patients = await response.json();
+            
+            const patientsTable = document.getElementById('patientsTable');
+            patientsTable.innerHTML = '';  // Clear the table before re-rendering
+
+            // Add the table headers
+            const headerRow = document.createElement('tr');
+            headerRow.innerHTML = `
+                <th>ID</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th>Contact Number</th>
+                <th>Admission Status</th>
+            `;
+            patientsTable.appendChild(headerRow);
+
+            // Add each patient's data to the table
+            patients.forEach(patient => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${patient.id}</td>
+                    <td>${patient.name}</td>
+                    <td>${patient.age}</td>
+                    <td>${patient.gender}</td>
+                    <td>${patient.contact_number}</td>
+                    <td>${patient.admission_status ? 'Admitted' : 'Not Admitted'}</td>
+                `;
+                patientsTable.appendChild(row);
+            });
+        }
+
+        // Fetch patients when the page loads
+        window.onload = fetchPatients;
+    </script>
+</head>
+<body>
+    <h1>Hospital Management System</h1>
+
+    <h2>Register Patient</h2>
+    <input type="text" id="patientName" placeholder="Name" required>
+    <input type="number" id="patientAge" placeholder="Age" required>
+    <input type="text" id="patientGender" placeholder="Gender" required>
+    <input type="text" id="patientAddress" placeholder="Address" required>
+    <input type="text" id="patientContact" placeholder="Contact Number" required>
+    <button onclick="registerPatient()">Register Patient</button>
+
+    <h2>Admit Patient</h2>
+    <input type="number" id="admitPatientId" placeholder="Patient ID" required>
+    <button onclick="admitPatient()">Admit Patient</button>
+
+    <h2>Discharge Patient</h2>
+    <input type="number" id="dischargePatientId" placeholder="Patient ID" required>
+    <button onclick="dischargePatient()">Discharge Patient</button>
+
+    <h2>Registered Patients</h2>
+    <table id="patientsTable" border="1">
+        <!-- Patient data will be inserted here -->
+    </table>
+</body>
+</html>
